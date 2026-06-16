@@ -1,0 +1,3 @@
+# goodsPriceCheck
+
+Initial repository bootstrap.
