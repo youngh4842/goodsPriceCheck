@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>상품 가격 조회</title>
+	<link rel="stylesheet" href="/css/app.css?v=2026061604">
+</head>
+<body>
+<main class="app">
+	<section class="search-panel">
+		<div>
+			<h1>상품 가격 조회</h1>
+			<p>상품명 또는 상품코드로 홈쇼핑모아 공개 검색 결과의 가격을 조회합니다.</p>
+		</div>
+		<form id="searchForm" class="search-form">
+			<label for="keyword">검색어</label>
+			<div class="search-row">
+				<input id="keyword" name="keyword" type="text" placeholder="DF18CB8600ER" autocomplete="off" required>
+				<button id="searchButton" type="submit">검색</button>
+			</div>
+			<span class="hint">예시 검색어: DF18CB8600ER</span>
+		</form>
+	</section>
+
+	<section class="result-panel" aria-live="polite">
+		<div class="result-head">
+			<h2>조회 결과</h2>
+			<span id="summary">검색어를 입력해 주세요.</span>
+		</div>
+		<div class="result-tools">
+			<div class="segmented-control" aria-label="렌탈 필터">
+				<button class="filter-button active" type="button" data-rental-filter="ALL">전체 상품</button>
+				<button class="filter-button" type="button" data-rental-filter="O">렌탈 가능 상품</button>
+				<button class="filter-button" type="button" data-rental-filter="X">구매 가능 상품</button>
+			</div>
+			<button id="toggleProductCode" class="secondary-button" type="button" aria-pressed="false">상품코드 숨기기</button>
+		</div>
+		<div id="message" class="message" hidden></div>
+		<div class="table-wrap">
+			<table id="resultTable">
+				<colgroup>
+					<col class="mall-col">
+					<col class="product-code-col" data-column="product-code">
+					<col class="product-name-col">
+					<col class="rental-col">
+					<col class="period-col">
+					<col class="price-col">
+					<col class="link-col">
+				</colgroup>
+				<thead>
+				<tr>
+					<th>쇼핑몰명</th>
+					<th data-column="product-code">상품코드</th>
+					<th>상품명</th>
+					<th>렌탈</th>
+					<th>기간</th>
+					<th>
+						<button id="priceSortButton" class="sort-button" type="button" aria-label="가격 오름차순 정렬">
+							가격 <span id="priceSortIcon" aria-hidden="true">▲</span>
+						</button>
+					</th>
+					<th>링크</th>
+				</tr>
+				</thead>
+				<tbody id="results"></tbody>
+			</table>
+		</div>
+	</section>
+</main>
+<script src="/js/app.js?v=2026061604"></script>
+</body>
+</html>

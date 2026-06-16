@@ -1,0 +1,320 @@
+:root {
+	--bg: #f7f8fb;
+	--panel: #ffffff;
+	--text: #1f2937;
+	--muted: #667085;
+	--line: #d9e0ea;
+	--brand: #2563eb;
+	--brand-dark: #1d4ed8;
+	--danger: #b42318;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+	font-family: Arial, "Noto Sans KR", sans-serif;
+}
+
+.app {
+	width: min(1120px, calc(100% - 32px));
+	margin: 32px auto;
+}
+
+.search-panel,
+.result-panel {
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	padding: 24px;
+}
+
+.search-panel {
+	display: grid;
+	grid-template-columns: minmax(240px, 1fr) minmax(320px, 520px);
+	gap: 24px;
+	align-items: end;
+}
+
+h1,
+h2,
+p {
+	margin: 0;
+}
+
+h1 {
+	font-size: 28px;
+	line-height: 1.25;
+}
+
+h2 {
+	font-size: 20px;
+}
+
+p,
+.hint,
+#summary {
+	color: var(--muted);
+}
+
+.search-form label {
+	display: block;
+	margin-bottom: 8px;
+	font-weight: 700;
+}
+
+.search-row {
+	display: flex;
+	gap: 8px;
+}
+
+input {
+	min-width: 0;
+	flex: 1;
+	height: 44px;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 0 12px;
+	font-size: 16px;
+}
+
+button {
+	height: 44px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--brand);
+	color: white;
+	padding: 0 18px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+button:hover {
+	background: var(--brand-dark);
+}
+
+button:disabled {
+	opacity: .65;
+	cursor: wait;
+}
+
+.secondary-button {
+	height: 36px;
+	border: 1px solid var(--line);
+	background: #ffffff;
+	color: var(--text);
+	padding: 0 12px;
+}
+
+.secondary-button:hover {
+	background: #f2f5f9;
+}
+
+.hint {
+	display: inline-block;
+	margin-top: 8px;
+	font-size: 14px;
+}
+
+.result-panel {
+	margin-top: 16px;
+}
+
+.result-head {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.result-tools {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.segmented-control {
+	display: inline-flex;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	overflow: hidden;
+	background: #ffffff;
+}
+
+.filter-button {
+	height: 36px;
+	border-radius: 0;
+	background: #ffffff;
+	color: var(--text);
+	border-right: 1px solid var(--line);
+	padding: 0 12px;
+}
+
+.filter-button:last-child {
+	border-right: 0;
+}
+
+.filter-button:hover,
+.filter-button.active {
+	background: var(--brand);
+	color: #ffffff;
+}
+
+.message {
+	margin-bottom: 16px;
+	padding: 12px;
+	border: 1px solid #fecdca;
+	border-radius: 6px;
+	color: var(--danger);
+	background: #fffbfa;
+}
+
+.table-wrap {
+	overflow-x: auto;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	min-width: 1040px;
+	table-layout: fixed;
+}
+
+.mall-col {
+	width: 130px;
+}
+
+.product-code-col {
+	width: 120px;
+}
+
+.product-name-col {
+	width: auto;
+}
+
+.rental-col {
+	width: 70px;
+}
+
+.period-col {
+	width: 90px;
+}
+
+.price-col {
+	width: 130px;
+}
+
+.link-col {
+	width: 86px;
+}
+
+th,
+td {
+	border-bottom: 1px solid var(--line);
+	padding: 12px;
+	text-align: left;
+	vertical-align: middle;
+	word-break: keep-all;
+}
+
+th {
+	background: #f2f5f9;
+	font-size: 14px;
+	text-align: center;
+}
+
+.sort-button {
+	width: 100%;
+	height: auto;
+	background: transparent;
+	color: var(--text);
+	padding: 0;
+	border-radius: 0;
+	font: inherit;
+	cursor: pointer;
+}
+
+.sort-button:hover {
+	background: transparent;
+	color: var(--brand);
+}
+
+.sort-button span {
+	display: inline-block;
+	margin-left: 4px;
+	font-size: 11px;
+}
+
+td[data-column="product-name"] {
+	word-break: break-word;
+}
+
+td[data-column="period"] {
+	color: var(--text);
+	text-align: center;
+	white-space: nowrap;
+}
+
+td[data-column="rental"] {
+	text-align: center;
+	white-space: nowrap;
+	font-weight: 700;
+}
+
+td[data-column="price"] {
+	white-space: nowrap;
+	font-weight: 700;
+}
+
+.hide-product-code [data-column="product-code"],
+.hide-product-code .product-code-col {
+	display: none;
+}
+
+a {
+	color: var(--brand);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+@media (max-width: 760px) {
+	.app {
+		width: min(100% - 20px, 1120px);
+		margin: 16px auto;
+	}
+
+	.search-panel {
+		grid-template-columns: 1fr;
+		padding: 18px;
+	}
+
+	.result-panel {
+		padding: 18px;
+	}
+
+	.result-head {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.search-row {
+		flex-direction: column;
+	}
+
+	button,
+	input {
+		width: 100%;
+	}
+}
