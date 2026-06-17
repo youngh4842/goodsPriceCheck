@@ -27,6 +27,18 @@ public class DailyIdGenerator {
 		return nextId("tb_product_price_result", "result_id", date);
 	}
 
+	public synchronized Long nextProductId(LocalDate date) {
+		return nextId("product_master", "product_id", date);
+	}
+
+	public synchronized Long nextMallItemId(LocalDate date) {
+		return nextId("product_mall_item", "mall_item_id", date);
+	}
+
+	public synchronized Long nextNotMatchedId(LocalDate date) {
+		return nextId("product_not_matched_item", "not_matched_id", date);
+	}
+
 	private Long nextId(String tableName, String idColumn, LocalDate date) {
 		long prefix = Long.parseLong(date.format(DATE_FORMAT));
 		long start = prefix * 10_000L;

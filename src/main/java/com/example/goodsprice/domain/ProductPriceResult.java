@@ -1,7 +1,11 @@
 package com.example.goodsprice.domain;
 
+import com.example.goodsprice.product.MatchStatus;
+import com.example.goodsprice.product.SaleType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -42,6 +46,20 @@ public class ProductPriceResult {
 	@Column(name = "product_url", length = 2000)
 	private String productUrl;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "sale_type")
+	private SaleType saleType;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "match_status")
+	private MatchStatus matchStatus;
+
+	@Column(name = "match_score")
+	private Integer matchScore;
+
+	@Column(name = "match_reason", length = 2000)
+	private String matchReason;
+
 	@Column(name = "crawled_at", nullable = false)
 	private LocalDateTime crawledAt;
 
@@ -49,7 +67,8 @@ public class ProductPriceResult {
 	}
 
 	public ProductPriceResult(String mallName, String productCode, String productName, String productPeriod, Long price,
-			String priceText, String productUrl, LocalDateTime crawledAt) {
+			String priceText, String productUrl, SaleType saleType, MatchStatus matchStatus, Integer matchScore,
+			String matchReason, LocalDateTime crawledAt) {
 		this.mallName = mallName;
 		this.productCode = productCode;
 		this.productName = productName;
@@ -57,6 +76,10 @@ public class ProductPriceResult {
 		this.price = price;
 		this.priceText = priceText;
 		this.productUrl = productUrl;
+		this.saleType = saleType;
+		this.matchStatus = matchStatus;
+		this.matchScore = matchScore;
+		this.matchReason = matchReason;
 		this.crawledAt = crawledAt;
 	}
 

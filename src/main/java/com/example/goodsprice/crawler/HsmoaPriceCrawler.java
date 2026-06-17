@@ -127,6 +127,7 @@ public class HsmoaPriceCrawler {
 			Map<String, CrawledProduct> unique = new LinkedHashMap<>();
 			JsonNode root = fetchEpApi(keyword, "");
 			collectProductNodes(root.path("results"), unique, keyword);
+			collectAggregatedSearchPage(keyword, unique);
 
 			for (String site : EP_SITE_FILTERS) {
 				if (reachedMaxResults(unique)) {
@@ -146,6 +147,20 @@ public class HsmoaPriceCrawler {
 		}
 		catch (Exception ex) {
 			throw new CrawlerException(CrawlerFailureType.RESULT_AREA_NOT_FOUND, "Failed to parse EP API result", ex);
+		}
+	}
+
+	private void collectAggregatedSearchPage(String keyword, Map<String, CrawledProduct> unique) {
+		try {
+			JsonNode root = objectMapper.readTree(extractNextData(fetchText(buildSearchUrl(keyword))));
+			JsonNode aggregatedData = root.path("props").path("pageProps").path("aggregatedData");
+			if (aggregatedData.isMissingNode() || aggregatedData.isNull()) {
+				return;
+			}
+			collectSearchPageSections(aggregatedData, unique, keyword);
+		}
+		catch (Exception ex) {
+			log.debug("Aggregated search page merge failed. keyword={}, reason={}", keyword, ex.getMessage());
 		}
 	}
 
@@ -294,11 +309,7 @@ public class HsmoaPriceCrawler {
 			if (aggregatedData.isMissingNode()) {
 				throw new CrawlerException(CrawlerFailureType.RESULT_AREA_NOT_FOUND, "aggregatedData was not found");
 			}
-			aggregatedData.fields().forEachRemaining(entry -> {
-				if (entry.getKey().matches("ep\\d+")) {
-					collectProductNodes(entry.getValue(), unique, keyword);
-				}
-			});
+			collectSearchPageSections(aggregatedData, unique, keyword);
 			return new CrawledSearchResult(limitResults(unique), null);
 		}
 		catch (CrawlerException ex) {
@@ -307,6 +318,17 @@ public class HsmoaPriceCrawler {
 		catch (Exception ex) {
 			throw new CrawlerException(CrawlerFailureType.RESULT_AREA_NOT_FOUND, "Failed to parse search result JSON", ex);
 		}
+	}
+
+	private void collectSearchPageSections(JsonNode aggregatedData, Map<String, CrawledProduct> unique, String keyword) {
+		collectProductNodes(aggregatedData.path("future"), unique, keyword);
+		collectProductNodes(aggregatedData.path("best"), unique, keyword);
+		collectProductNodes(aggregatedData.path("past"), unique, keyword);
+		aggregatedData.fields().forEachRemaining(entry -> {
+			if (entry.getKey().matches("ep\\d+")) {
+				collectProductNodes(entry.getValue(), unique, keyword);
+			}
+		});
 	}
 
 	private String extractNextData(String html) {
@@ -517,6 +539,18 @@ public class HsmoaPriceCrawler {
 	private String toMallName(String site) {
 		if (site == null || site.isBlank()) {
 			return "홈쇼핑모아";
+		}
+		if ("hnsmall".equals(site)) {
+			return "홈앤쇼핑";
+		}
+		if ("kshop".equals(site)) {
+			return "KT알파쇼핑";
+		}
+		if ("shopnt".equals(site)) {
+			return "쇼핑엔티";
+		}
+		if ("wshop".equals(site)) {
+			return "W쇼핑";
 		}
 		return switch (site) {
 			case "gsshop" -> "GS샵";

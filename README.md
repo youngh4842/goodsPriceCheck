@@ -1,6 +1,6 @@
 # 상품 기반 가격 조회 MVP
 
-Spring Boot 기반 단건 상품 가격 조회 MVP입니다. 사용자가 상품명 또는 상품코드를 입력하면 홈쇼핑모아 공개 검색 결과에서 쇼핑몰명, 상품명, 가격, 링크를 수집해 화면과 API로 제공합니다.
+Spring Boot 기반 상품 가격 조회 MVP입니다. 사용자가 상품명 또는 상품코드를 입력하면 홈쇼핑모아 공개 검색 결과에서 가격 정보를 수집하고, 검색 결과별 상품 일치 여부를 규칙 기반으로 검증합니다. 사용자가 확인한 쇼핑몰 상품은 추적 상품으로 등록할 수 있습니다.
 
 ## 기술 스택
 
@@ -10,127 +10,170 @@ Spring Boot 기반 단건 상품 가격 조회 MVP입니다. 사용자가 상품
 - Thymeleaf
 - Spring Data JPA
 - H2 Database
-- Playwright Java(브라우저 자동화 fallback)
+- Playwright Java
 
 ## 실행 방법
 
-1. Chromium 브라우저를 설치합니다.
-
 ```powershell
 .\gradlew.bat playwrightInstall
-```
-
-2. 애플리케이션을 실행합니다.
-
-```powershell
 .\gradlew.bat bootRun
 ```
 
-3. 브라우저에서 화면을 엽니다.
-
-```text
-http://localhost:8080
-```
-
-H2 콘솔은 `http://localhost:8080/h2-console`에서 확인할 수 있습니다.
-
+- 화면: `http://localhost:8080`
+- H2 콘솔: `http://localhost:8080/h2-console`
 - JDBC URL: `jdbc:h2:mem:goods_price`
 - User Name: `sa`
 - Password: 빈 값
 
-## API
+## 주요 API
+
+### 가격 조회
 
 ```http
 GET /api/products/price-search?keyword=DF18CB8600ER
 ```
 
-응답 예시:
+검색 결과에는 기존 가격 정보와 함께 다음 검증 필드가 포함됩니다.
+
+```json
+{
+  "mallName": "A 쇼핑몰",
+  "productCode": "2080262380",
+  "mallProductName": "삼성 비스포크 에어드레서 DF18CB8600ER",
+  "productName": "삼성 비스포크 에어드레서",
+  "rentalYn": "X",
+  "productPeriod": null,
+  "price": 1234000,
+  "priceText": "1,234,000원",
+  "productUrl": "https://example.com/product/123",
+  "saleType": "PURCHASE",
+  "matchStatus": "MATCHED",
+  "matchScore": 100,
+  "matchReasons": ["모델코드가 정확히 일치합니다."]
+}
+```
+
+### 추적 상품 등록
+
+```http
+POST /api/tracked-products
+Content-Type: application/json
+```
 
 ```json
 {
   "keyword": "DF18CB8600ER",
-  "searchedAt": "2026-06-12T15:30:00",
-  "found": true,
-  "resultCount": 2,
-  "sourceTotalCount": 146851,
-  "results": [
+  "productCode": "DF18CB8600ER",
+  "productName": "삼성 비스포크 에어드레서",
+  "brandName": "삼성",
+  "selectedItems": [
     {
-      "mallName": "CJ온스타일",
-      "productCode": "2080262380",
-      "productName": "Bespoke AI 에어드레서 [새틴 베이지]",
-      "rentalYn": "X",
-      "productPeriod": null,
-      "price": 1059080,
-      "priceText": "1,059,080원",
-      "productUrl": "https://display.cjonstyle.com/p/item/2080262380"
+      "mallName": "A 쇼핑몰",
+      "mallProductName": "삼성 비스포크 에어드레서 DF18CB8600ER",
+      "normalizedProductName": "삼성 비스포크 에어드레서",
+      "productUrl": "https://example.com/product/123",
+      "saleType": "PURCHASE",
+      "matchStatus": "MATCHED",
+      "matchScore": 100,
+      "matchReasons": ["모델코드가 정확히 일치합니다."]
     }
-  ],
-  "message": null
+  ]
 }
 ```
 
-검색어가 비어 있으면 `400 Bad Request`와 함께 `검색어를 입력해 주세요.` 메시지를 반환합니다.
+### 검증 상태 수동 변경
+
+```http
+PATCH /api/mall-items/{mallItemId}/match-status
+Content-Type: application/json
+```
+
+```json
+{
+  "matchStatus": "NOT_MATCHED",
+  "manualConfirmed": true
+}
+```
 
 ## DB 테이블
 
-`search_id`, `result_id`는 `yyMMdd + 4자리 일련번호` 형식으로 저장합니다.
-예를 들어 2026년 6월 15일 첫 번째 데이터는 `2606150001`입니다.
+기존 검색 로그 테이블은 유지됩니다. `search_id`, `result_id`, `product_id`, `mall_item_id`는 `yyMMdd + 4자리 일련번호` 형식으로 생성됩니다.
 
 ### TB_SEARCH_LOG
 
-| 컬럼 | 타입 | 설명 |
-| --- | --- | --- |
-| search_id | BIGINT, PK | 날짜 조합 일련번호 |
-| keyword | VARCHAR | 검색어 |
-| result_count | INT | MVP 수집 결과 수 |
-| success_yn | CHAR | 성공 여부 |
-| error_message | VARCHAR | 실패 메시지 |
-| searched_at | DATETIME | 검색 시각 |
+| 컬럼 | 설명 |
+| --- | --- |
+| search_id | 검색 로그 ID |
+| keyword | 검색어 |
+| result_count | 수집 결과 수 |
+| success_yn | 성공 여부 |
+| error_message | 실패 메시지 |
+| searched_at | 검색 시각 |
 
 ### TB_PRODUCT_PRICE_RESULT
 
-| 컬럼 | 타입 | 설명 |
-| --- | --- | --- |
-| result_id | BIGINT, PK | 날짜 조합 일련번호 |
-| search_id | BIGINT, FK | 검색 로그 ID |
-| mall_name | VARCHAR | 쇼핑몰명 |
-| product_code | VARCHAR | 상품코드 |
-| product_period | VARCHAR | 상품명에서 추출한 기간. 예: `60개월`, `5년` |
-| product_name | VARCHAR | 상품명 |
-| price | BIGINT | 숫자 가격 |
-| price_text | VARCHAR | 원본 가격 문구 |
-| product_url | VARCHAR | 상품 링크 |
-| crawled_at | DATETIME | 수집 시각 |
+| 컬럼 | 설명 |
+| --- | --- |
+| result_id | 검색 결과 ID |
+| search_id | 검색 로그 ID |
+| mall_name | 쇼핑몰명 |
+| product_code | 쇼핑몰 상품코드 |
+| product_period | 기간 |
+| product_name | 정리된 상품명 |
+| price | 숫자 가격 |
+| price_text | 가격 문자열 |
+| product_url | 상품 링크 |
+| sale_type | PURCHASE, RENTAL, USED, UNKNOWN |
+| match_status | MATCHED, POSSIBLE_MATCH, NOT_MATCHED, UNKNOWN |
+| match_score | 일치 점수 |
+| match_reason | 검증 사유 |
+| crawled_at | 수집 시각 |
 
-## 주요 흐름
+### PRODUCT_MASTER
 
-1. `ProductPriceApiController`가 `/api/products/price-search` 요청을 받습니다.
-2. `ProductPriceSearchService`가 검색어를 검증하고 검색 로그를 생성합니다.
-3. `HsmoaPriceCrawler`가 홈쇼핑모아 EP 검색 API를 조회합니다.
-4. EP API가 실패하면 서버 렌더링 HTML 조회, Playwright 브라우저 검색 순서로 fallback합니다.
-5. `crawler.max-results`가 0이면 제한 없이 수집하고, 양수이면 해당 건수까지만 저장/표시합니다.
-6. 성공 시 `TB_SEARCH_LOG`, `TB_PRODUCT_PRICE_RESULT`에 로그와 결과를 저장합니다.
-7. 실패 시 사용자 메시지를 반환하고 실패 사유를 `TB_SEARCH_LOG.error_message`에 저장합니다.
+| 컬럼 | 설명 |
+| --- | --- |
+| product_id | 추적 상품 ID |
+| product_code | 정규화된 모델코드 |
+| product_name | 사용자가 확정한 기준 상품명 |
+| brand_name | 브랜드명 |
+| active_yn | 추적 활성 여부 |
+| created_at | 등록 시각 |
+| updated_at | 수정 시각 |
 
-## 주요 클래스
+### PRODUCT_MALL_ITEM
 
-- `HsmoaSelectors`: 홈쇼핑모아 selector 후보를 한 곳에서 관리합니다.
-- `HsmoaPriceCrawler`: 홈쇼핑모아 접속, 검색 페이지 로딩, 결과 추출을 담당합니다.
-- `PriceParser`: 가격 문자열과 숫자 가격 변환을 담당합니다.
-- `SearchLog`, `ProductPriceResult`: 요구사항의 H2 테이블에 매핑되는 JPA 엔티티입니다.
-- `DailyIdGenerator`: `yyMMdd + 4자리 일련번호` 형식으로 `search_id`, `result_id`를 채번합니다.
-- `ProductPeriodParser`: 상품명에서 `60개월`, `5년` 같은 기간 표현을 추출합니다.
-- `ProductPriceSearchService`: 크롤링 결과 저장과 API 응답 생성을 담당합니다.
+| 컬럼 | 설명 |
+| --- | --- |
+| mall_item_id | 쇼핑몰 상품 ID |
+| product_id | 추적 상품 ID |
+| mall_name | 쇼핑몰명 |
+| mall_product_name | 쇼핑몰 원본 상품명 |
+| normalized_product_name | 정규화 상품명 |
+| product_url | 상품 링크 |
+| sale_type | 판매유형 |
+| match_status | 검증 상태 |
+| match_score | 일치 점수 |
+| match_reason | 검증 사유 |
+| manually_confirmed_yn | 사용자 수동 확정 여부 |
+| active_yn | 가격 추적 활성 여부 |
+| last_crawled_at | 마지막 수집 시각 |
+| created_at | 등록 시각 |
+| updated_at | 수정 시각 |
 
-## 예외 처리
+## 검증 규칙
 
-- 검색어 미입력: API 요청 단계에서 검증합니다.
-- 검색 결과 없음: 빈 배열과 `검색 결과가 없습니다.` 메시지를 반환하고 성공 로그로 저장합니다.
-- 홈쇼핑모아 접속 실패, 검색창 탐색 실패, 결과 영역 탐색 실패, 타임아웃: 실패 메시지를 반환하고 실패 로그로 저장합니다.
-- 가격 파싱 실패: 가격을 `null`, 가격 문구를 `가격정보 없음`으로 처리합니다.
-- 상품 링크 추출 실패: 링크가 없는 상품은 결과에서 제외합니다.
+- 모델코드는 대문자 변환 후 공백, 하이픈, 언더스코어, 특수문자를 제거해 비교합니다.
+- 검색어가 모델코드이고 상품명에 동일 모델코드가 있으면 `MATCHED`로 판단합니다.
+- 필터, 부품, 액세서리, 케이스, 커버, 거치대, 호환, 리필, 전용, 교체용 키워드는 `NOT_MATCHED` 검토 대상으로 분리합니다.
+- 렌탈 단어 또는 기간 정보가 있으면 판매유형을 `RENTAL`로 표시합니다.
+- 중고 단어가 있으면 판매유형을 `USED`로 표시합니다.
+- 정보가 부족하면 자동 제외하지 않고 `UNKNOWN` 또는 `POSSIBLE_MATCH`로 표시합니다.
 
-## 운영 주의
+## 테스트
 
-초기 MVP는 공개 검색 결과만 단건 조회합니다. 로그인, 개인정보, 비공개 데이터 수집은 포함하지 않습니다.
-`crawler.max-results=0`이면 수집 건수 제한을 두지 않으며, 필요한 경우 `crawler.max-results=50`처럼 상한을 설정할 수 있습니다.
+```powershell
+.\gradlew.bat test
+```
+
+주요 테스트는 상품명 정규화, 기간 추출, 모델코드 정규화, 자동 검증 상태 판정을 확인합니다.

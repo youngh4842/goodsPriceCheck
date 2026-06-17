@@ -9,14 +9,22 @@ class ProductPeriodParserTests {
 	private final ProductPeriodParser parser = new ProductPeriodParser();
 
 	@Test
-	void extractsRentalPeriod() {
+	void parsesMonthPeriod() {
 		assertThat(parser.parse("삼성 에어드레서 DF18CB8600ER 60개월")).isEqualTo("60개월");
-		assertThat(parser.parse("렌탈 삼성 에어드레서 DF18CB8600ER 5년")).isEqualTo("5년");
 	}
 
 	@Test
-	void returnsNullWhenPeriodDoesNotExist() {
+	void parsesYearPeriod() {
+		assertThat(parser.parse("삼성 에어드레서 DF18CB8600ER 5년")).isEqualTo("5년");
+	}
+
+	@Test
+	void ignoresModelYearExpression() {
+		assertThat(parser.parse("삼성 에어드레서 2026년형 DF18CB8600ER")).isNull();
+	}
+
+	@Test
+	void returnsNullWhenPeriodIsMissing() {
 		assertThat(parser.parse("삼성 에어드레서 DF18CB8600ER")).isNull();
-		assertThat(parser.parse("2026년형 삼성 에어드레서 DF18CB8600ER")).isNull();
 	}
 }
