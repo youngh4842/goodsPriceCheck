@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Mock Mall Search</title>
+	<link rel="stylesheet" href="/css/mock-mall.css">
+</head>
+<body>
+<main class="page">
+	<header class="shop-header">
+		<div>
+			<p class="eyebrow">Search results</p>
+			<h1>Mock Shopping Mall</h1>
+		</div>
+		<a class="subtle-link" href="/">Home</a>
+	</header>
+	<form class="search-bar" action="/search" method="get">
+		<input data-testid="search-input" name="keyword" th:value="${keyword}" placeholder="상품코드 또는 상품명을 입력하세요">
+		<button data-testid="search-button" type="submit">검색</button>
+	</form>
+	<section class="product-list">
+		<article class="result-row" th:each="product : ${products}" data-testid="search-result-item">
+			<div>
+				<div class="mall" data-testid="mall-name" th:text="${product.mallName}">Mock Mall A</div>
+				<h2 data-testid="product-name" th:text="${product.productName}">상품명</h2>
+				<div class="meta">
+					<span data-testid="product-code" th:text="${product.productCode}">CODE</span>
+					<span data-testid="sale-type" th:text="${product.saleType}">PURCHASE</span>
+					<span data-testid="sale-status" th:text="${product.saleStatus}">ACTIVE</span>
+				</div>
+			</div>
+			<div class="result-side">
+				<strong data-testid="product-price" th:if="${product.priceVisibleYn == 'Y'}" th:text="${product.priceText}">0원</strong>
+				<a data-testid="product-link" th:href="@{/products/{id}(id=${product.mockProductId})}">상품 보기</a>
+			</div>
+		</article>
+	</section>
+</main>
+</body>
+</html>

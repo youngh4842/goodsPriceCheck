@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Mock Mall Admin</title>
+	<link rel="stylesheet" href="/css/mock-mall.css">
+</head>
+<body>
+<main class="admin-page">
+	<header class="shop-header">
+		<div>
+			<p class="eyebrow">Admin</p>
+			<h1>Mock 상품 관리</h1>
+		</div>
+		<a class="subtle-link" href="/">Mall</a>
+	</header>
+
+	<form class="search-bar" action="/admin/products" method="get">
+		<input name="keyword" th:value="${keyword}" placeholder="상품코드, 상품명, 브랜드 검색">
+		<button type="submit">검색</button>
+	</form>
+
+	<section class="admin-section">
+		<h2>상품 신규 등록</h2>
+		<form class="admin-form create-form" action="/admin/products" method="post">
+			<input name="productCode" placeholder="상품코드" required>
+			<input name="productName" placeholder="상품명" required>
+			<input name="brandName" placeholder="브랜드">
+			<input name="mallName" placeholder="쇼핑몰명" value="Mock Mall A" required>
+			<input name="price" type="number" min="1" value="1000" required>
+			<select name="saleType">
+				<option th:each="saleType : ${saleTypes}" th:value="${saleType}" th:text="${saleType}"></option>
+			</select>
+			<select name="saleStatus">
+				<option th:each="saleStatus : ${saleStatuses}" th:value="${saleStatus}" th:text="${saleStatus}"></option>
+			</select>
+			<select name="priceVisibleYn">
+				<option value="Y">가격 표시</option>
+				<option value="N">가격 숨김</option>
+			</select>
+			<input name="productImageUrl" placeholder="이미지 URL">
+			<textarea name="productDescription" placeholder="상품 설명"></textarea>
+			<button type="submit">등록</button>
+		</form>
+	</section>
+
+	<section class="admin-section">
+		<h2>상품 목록</h2>
+		<div class="admin-products">
+			<article class="admin-product" th:each="product : ${products}">
+				<div class="admin-product-head">
+					<div>
+						<div class="mall" th:text="${product.mallName}">Mock Mall A</div>
+						<h3 th:text="${product.productName}">상품명</h3>
+						<p class="meta">
+							<span th:text="${product.productCode}">CODE</span>
+							<span th:text="${product.priceText}">0원</span>
+							<span th:text="${product.saleStatus}">ACTIVE</span>
+							<span th:text="${product.priceVisibleYn == 'Y' ? '가격 표시' : '가격 숨김'}">가격 표시</span>
+						</p>
+					</div>
+					<a th:href="@{/products/{id}(id=${product.mockProductId})}">상세</a>
+				</div>
+
+				<form class="inline-form" th:action="@{/admin/products/{id}/price(id=${product.mockProductId})}" method="post">
+					<input name="price" type="number" min="1" th:value="${product.price}" required>
+					<input name="changeReason" placeholder="변경 사유" value="가격 변경 테스트">
+					<button type="submit">가격 변경</button>
+				</form>
+
+				<form class="quick-actions" th:action="@{/admin/products/{id}/quick-price(id=${product.mockProductId})}" method="post">
+					<button name="mode" value="UP_10000" type="submit">+10,000</button>
+					<button name="mode" value="DOWN_10000" type="submit">-10,000</button>
+					<button name="mode" value="DOWN_50000" type="submit">-50,000</button>
+					<button name="mode" value="UP_5P" type="submit">+5%</button>
+					<button name="mode" value="DOWN_5P" type="submit">-5%</button>
+					<button name="mode" value="DOWN_10P" type="submit">-10%</button>
+				</form>
+
+				<form class="inline-form" th:action="@{/admin/products/{id}/sale-status(id=${product.mockProductId})}" method="post">
+					<select name="saleStatus">
+						<option th:each="saleStatus : ${saleStatuses}" th:value="${saleStatus}" th:text="${saleStatus}"
+								th:selected="${saleStatus == product.saleStatus}"></option>
+					</select>
+					<button type="submit">상태 변경</button>
+				</form>
+
+				<form class="inline-form" th:action="@{/admin/products/{id}/price-visible(id=${product.mockProductId})}" method="post">
+					<select name="priceVisibleYn">
+						<option value="Y" th:selected="${product.priceVisibleYn == 'Y'}">가격 표시</option>
+						<option value="N" th:selected="${product.priceVisibleYn == 'N'}">가격 숨김</option>
+					</select>
+					<button type="submit">노출 변경</button>
+				</form>
+
+				<form class="admin-form" th:action="@{/admin/products/{id}(id=${product.mockProductId})}" method="post">
+					<input name="productCode" th:value="${product.productCode}" required>
+					<input name="productName" th:value="${product.productName}" required>
+					<input name="brandName" th:value="${product.brandName}">
+					<input name="mallName" th:value="${product.mallName}" required>
+					<input name="price" type="number" min="1" th:value="${product.price}" required>
+					<select name="saleType">
+						<option th:each="saleType : ${saleTypes}" th:value="${saleType}" th:text="${saleType}"
+								th:selected="${saleType == product.saleType}"></option>
+					</select>
+					<select name="saleStatus">
+						<option th:each="saleStatus : ${saleStatuses}" th:value="${saleStatus}" th:text="${saleStatus}"
+								th:selected="${saleStatus == product.saleStatus}"></option>
+					</select>
+					<select name="priceVisibleYn">
+						<option value="Y" th:selected="${product.priceVisibleYn == 'Y'}">가격 표시</option>
+						<option value="N" th:selected="${product.priceVisibleYn == 'N'}">가격 숨김</option>
+					</select>
+					<input name="productImageUrl" th:value="${product.productImageUrl}">
+					<textarea name="productDescription" th:text="${product.productDescription}"></textarea>
+					<button type="submit">정보 수정</button>
+				</form>
+			</article>
+		</div>
+	</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title th:text="${product.productName}">Mock Product</title>
+	<link rel="stylesheet" href="/css/mock-mall.css">
+</head>
+<body>
+<main class="page detail-page">
+	<a class="subtle-link" href="/">Home</a>
+	<section class="detail-layout">
+		<img class="product-image" th:src="${product.productImageUrl}" alt="">
+		<div class="detail-info">
+			<div data-testid="mall-name" class="mall" th:text="${product.mallName}">Mock Mall A</div>
+			<h1 data-testid="product-name" th:text="${product.productName}">상품명</h1>
+			<div class="meta">
+				<span data-testid="product-code" th:text="${product.productCode}">CODE</span>
+				<span data-testid="brand-name" th:text="${product.brandName}">브랜드</span>
+				<span data-testid="sale-type" th:text="${product.saleType}">PURCHASE</span>
+				<span data-testid="sale-status" th:text="${product.saleStatus}">ACTIVE</span>
+			</div>
+			<div class="price-box">
+				<span data-testid="product-price" th:if="${product.priceVisibleYn == 'Y'}" th:text="${product.priceText}">0원</span>
+				<span data-testid="price-hidden" th:if="${product.priceVisibleYn == 'N'}">가격 미노출</span>
+			</div>
+			<p data-testid="product-description" th:text="${product.productDescription}">상품 설명</p>
+		</div>
+	</section>
+</main>
+</body>
+</html>
