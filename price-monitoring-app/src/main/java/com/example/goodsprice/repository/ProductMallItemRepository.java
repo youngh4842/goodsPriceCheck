@@ -14,4 +14,8 @@ public interface ProductMallItemRepository extends JpaRepository<ProductMallItem
 	List<ProductMallItem> findByMallProductCodeIn(Collection<String> mallProductCodes);
 
 	List<ProductMallItem> findByProductMasterProductId(Long productId);
+
+	List<ProductMallItem> findByMallProductCodeInAndActiveYn(Collection<String> mallProductCodes, String activeYn);
+
+	List<ProductMallItem> findByProductMasterProductIdAndActiveYn(Long productId, String activeYn);
 }

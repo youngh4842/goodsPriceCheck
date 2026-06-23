@@ -2,6 +2,7 @@ package com.example.goodsprice.product;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +51,12 @@ public class TrackedProductApiController {
 	@PostMapping("/api/tracked-products/{productId}/refresh")
 	public RefreshTrackedProductResponse refreshTrackedProduct(@PathVariable Long productId) {
 		return trackedProductService.refreshTrackedProduct(productId);
+	}
+
+	@DeleteMapping("/api/tracked-products/mall-items/{mallItemId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void unregisterMallItem(@PathVariable Long mallItemId) {
+		trackedProductService.unregisterMallItem(mallItemId);
 	}
 
 	@PatchMapping("/api/mall-items/{mallItemId}/match-status")

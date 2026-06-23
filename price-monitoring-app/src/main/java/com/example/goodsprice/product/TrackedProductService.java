@@ -101,6 +101,7 @@ public class TrackedProductService {
 	public List<TrackedProductGroupResponse> findTrackedProducts() {
 		Map<String, List<TrackedProductItemResponse>> groupedItems = new LinkedHashMap<>();
 		productMallItemRepository.findAll().stream()
+				.filter(item -> "Y".equals(item.getActiveYn()))
 				.sorted(Comparator
 						.comparing((ProductMallItem item) -> blankToDash(item.getProductMaster().getSearchKeyword()))
 						.thenComparing(item -> blankToDash(item.getProductMaster().getProductCode()))
@@ -135,7 +136,7 @@ public class TrackedProductService {
 	public RefreshTrackedProductResponse refreshTrackedProduct(Long productId) {
 		ProductMaster productMaster = productMasterRepository.findById(productId)
 				.orElseThrow(() -> new ProductPriceSearchException("추적 상품을 찾을 수 없습니다."));
-		List<ProductMallItem> mallItems = productMallItemRepository.findByProductMasterProductId(productId);
+		List<ProductMallItem> mallItems = productMallItemRepository.findByProductMasterProductIdAndActiveYn(productId, "Y");
 		CrawlRunLog runLog = new CrawlRunLog(dailyIdGenerator.nextCrawlRunId(LocalDate.now()),
 				PriceHistorySourceType.MANUAL, mallItems.size());
 		crawlRunLogRepository.save(runLog);
@@ -191,6 +192,13 @@ public class TrackedProductService {
 		runLog.finish(successCount, failureCount, changedCount, runError);
 		return new RefreshTrackedProductResponse(productId, runLog.getCrawlRunId(), mallItems.size(), successCount,
 				failureCount, changedCount, "수동 재조회를 완료했습니다.");
+	}
+
+	@Transactional
+	public void unregisterMallItem(Long mallItemId) {
+		ProductMallItem mallItem = productMallItemRepository.findById(mallItemId)
+				.orElseThrow(() -> new ProductPriceSearchException("추적 등록된 쇼핑몰 상품을 찾을 수 없습니다."));
+		mallItem.deactivateTracking();
 	}
 
 	@Transactional

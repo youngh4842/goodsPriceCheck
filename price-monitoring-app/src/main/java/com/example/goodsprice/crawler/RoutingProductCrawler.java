@@ -27,10 +27,20 @@ public class RoutingProductCrawler implements ProductCrawler {
 
 	@Override
 	public Optional<CrawledProduct> fetchProduct(String productUrl) {
+		if (isMockMallUrl(productUrl)) {
+			return mockMallPriceCrawler.fetchProduct(productUrl);
+		}
 		return activeCrawler().fetchProduct(productUrl);
 	}
 
 	private ProductCrawler activeCrawler() {
 		return crawlerSourceService.currentSource() == CrawlerSource.MOCK_MALL ? mockMallPriceCrawler : hsmoaPriceCrawler;
+	}
+
+	private boolean isMockMallUrl(String productUrl) {
+		if (productUrl == null || productUrl.isBlank()) {
+			return false;
+		}
+		return productUrl.contains("localhost:8090") || productUrl.contains("127.0.0.1:8090");
 	}
 }

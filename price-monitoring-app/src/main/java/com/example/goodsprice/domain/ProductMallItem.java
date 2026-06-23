@@ -139,6 +139,10 @@ public class ProductMallItem {
 		this.matchReason = appendReason(this.matchReason, "사용자가 검증 상태를 " + matchStatus + "(으)로 변경했습니다.");
 	}
 
+	public void deactivateTracking() {
+		this.activeYn = "N";
+	}
+
 	private String appendReason(String before, String reason) {
 		if (before == null || before.isBlank()) {
 			return reason;

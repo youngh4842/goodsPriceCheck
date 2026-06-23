@@ -152,7 +152,7 @@ public class ProductPriceSearchService {
 			return Map.of();
 		}
 		Map<String, Long> trackedMallItemIds = new LinkedHashMap<>();
-		for (ProductMallItem item : productMallItemRepository.findByMallProductCodeIn(productCodes)) {
+		for (ProductMallItem item : productMallItemRepository.findByMallProductCodeInAndActiveYn(productCodes, "Y")) {
 			if (item.getMallProductCode() != null && !item.getMallProductCode().isBlank()) {
 				trackedMallItemIds.putIfAbsent(item.getMallProductCode(), item.getMallItemId());
 			}
